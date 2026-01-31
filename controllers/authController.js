@@ -1,7 +1,8 @@
 const bcrypt = require("bcrypt");
 const generateJWT = require("../helper/generateToken");
 const ApiError = require("../helper/apiError");
-const {createAuthUser, findAuthUser} = require('../services/authServices')
+const {createAuthUser, findAuthUser} = require('../services/authServices');
+const logger = require("../helper/logger");
 
 // REGISTER
 const register = async (req, res) => {
@@ -32,6 +33,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const {email, password} = req.body;
+    logger.info(`Login attempt : ${req.body.email}`)
     
     if(!email || !password) {
         throw new ApiError("All field are required", 400)
