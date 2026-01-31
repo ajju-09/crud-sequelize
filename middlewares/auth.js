@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { findByPrimaryKey } = require("../services/authServices");
 
 const auth = async (req, res, next) => {
   try {
@@ -8,13 +9,16 @@ const auth = async (req, res, next) => {
 
     if (authHeader && authHeader.startsWith("Bearer")) {
       token = authHeader.split(" ")[1];
-      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-        if (err) return res.status(400).json("Invalid token");
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if(!decoded) return res.status(400).json({ message: "User token is not authorized"});
+      const user = await findByPrimaryKey(decoded.id);
 
-        req.userId = decoded.id;
+      if(!user) return res.status(400).json({ message: "Invalid User"})
+
+        req.userId = user.id;
+        req.userRole = user.role;
 
         next();
-      });
     }
 
     if (!token) {
